@@ -1,21 +1,54 @@
 {
   "expo": {
+    "icon": "./assets/logo.png",
     "scheme": "acme",
     "userInterfaceStyle": "automatic",
     "orientation": "default",
+    "backgroundColor": "#FFFFFF",
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/splashscreen_logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
     "web": {
       "output": "static",
       "bundler": "metro"
     },
     "plugins": [
-      [
-        "expo-router",
-        {
-          "origin": "https://n"
-        }
-      ]
+      "expo-router",
+      "expo-secure-store"
     ],
-    "name": "my-app",
-    "slug": "my-app"
+    "name": "Записная книжка",
+    "slug": "zapisnaya-knizhka",
+    "version": "1.0.0",
+    "android": {
+      "package": "com.zapisnayaknizhka.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "permissions": []
+    },
+    "ios": {
+      "bundleIdentifier": "com.zapisnayaknizhka.app",
+      "supportsTablet": true
+    },
+    "extra": {
+      "themeColors": {
+        "light": {
+          "backgroundColor": "#ffffff",
+          "splashBackgroundColor": "#ffffff"
+        },
+        "dark": {
+          "backgroundColor": "#000000",
+          "splashBackgroundColor": "#000000"
+        }
+      },
+      "eas": {
+        "projectId": "ec57d1b7-8ba8-440e-8839-2a5574f966f6"
+      }
+    },
+    "owner": "vaces8v"
   }
 }
