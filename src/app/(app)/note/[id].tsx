@@ -8,6 +8,7 @@ import { Center, Spinner, useToast, Icon, Pressable } from 'native-base';
 import { useDeleteAlert } from '@/store/deleteAlert.store';
 import Modal from 'react-native-modal';
 import { GestureHandlerRootView, PanGestureHandler, PanGestureHandlerGestureEvent } from 'react-native-gesture-handler';
+import { useColorMode, useColorModeValue } from 'native-base';
 
 export default function NoteScreen() {
   const { id } = useLocalSearchParams();
@@ -15,6 +16,8 @@ export default function NoteScreen() {
   const [loading, setLoading] = useState(true);
   const { isOpenAlert, setIsCloseAlert } = useDeleteAlert();
   const toast = useToast();
+  const { colorMode } = useColorMode();
+  const isDarkMode = colorMode === 'dark';
 
   useEffect(() => {
     loadNote();
@@ -82,30 +85,32 @@ export default function NoteScreen() {
   }
 
   return (
-    <GestureHandlerRootView style={styles.container}>
+    <GestureHandlerRootView style={[styles.container, { backgroundColor: isDarkMode ? '#1a1a1a' : '#fff' }]}>
       <PanGestureHandler
         onGestureEvent={onGestureEvent}
         onHandlerStateChange={onHandlerStateChange}
-        activeOffsetX={[-20, 20]} // Активируем жест только при горизонтальном движении
-        failOffsetY={[-20, 20]} // Отменяем жест при вертикальном движении
+        activeOffsetX={[-20, 20]}
+        failOffsetY={[-20, 20]}
       >
         <View style={styles.container}>
           {loading ? (
             <Center flex={1}>
-              <Spinner size="lg" />
+              <Spinner size="lg" color={isDarkMode ? "white" : "blue.500"} />
             </Center>
           ) : note ? (
-            <ScrollView 
-              style={styles.content}
-              scrollEventThrottle={16}
-              showsVerticalScrollIndicator={true}
-            >
-              <Text style={styles.title}>{note.title}</Text>
-              <Text style={styles.text}>{note.description}</Text>
+            <ScrollView style={styles.content}>
+              <Text style={[styles.title, { color: isDarkMode ? '#fff' : '#000' }]}>
+                {note.title}
+              </Text>
+              <Text style={[styles.text, { color: isDarkMode ? '#ccc' : '#333' }]}>
+                {note.description}
+              </Text>
             </ScrollView>
           ) : (
             <Center flex={1}>
-              <Text>Заметка не найдена</Text>
+              <Text style={{ color: isDarkMode ? '#fff' : '#000' }}>
+                Заметка не найдена
+              </Text>
             </Center>
           )}
 
@@ -116,22 +121,28 @@ export default function NoteScreen() {
             useNativeDriver
             style={styles.modal}
           >
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Удалить заметку?</Text>
-              <Text style={styles.modalText}>
+            <View style={[styles.modalContent, { backgroundColor: isDarkMode ? '#2a2a2a' : 'white' }]}>
+              <Text style={[styles.modalTitle, { color: isDarkMode ? '#fff' : '#000' }]}>
+                Удалить заметку?
+              </Text>
+              <Text style={[styles.modalText, { color: isDarkMode ? '#999' : '#666' }]}>
                 Это действие нельзя будет отменить
               </Text>
               <TouchableOpacity
                 style={styles.deleteButton}
                 onPress={handleDelete}
               >
-                <Text style={styles.deleteButtonText}>Удалить</Text>
+                <Text style={styles.deleteButtonText}>
+                  Удалить
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.cancelButton}
                 onPress={setIsCloseAlert}
               >
-                <Text style={styles.cancelButtonText}>Отмена</Text>
+                <Text style={[styles.cancelButtonText, { color: isDarkMode ? '#0A84FF' : '#007AFF' }]}>
+                  Отмена
+                </Text>
               </TouchableOpacity>
             </View>
           </Modal>
@@ -144,7 +155,6 @@ export default function NoteScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   content: {
     flex: 1,
@@ -164,7 +174,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: 'white',
     padding: 20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -179,7 +188,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 20,
     textAlign: 'center',
-    color: '#666',
   },
   deleteButton: {
     backgroundColor: '#FF3B30',
@@ -198,7 +206,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   cancelButtonText: {
-    color: '#007AFF',
     textAlign: 'center',
     fontSize: 16,
     fontWeight: '600',

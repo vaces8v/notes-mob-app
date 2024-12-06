@@ -2,13 +2,15 @@ import { View, StyleSheet, TextInput, Pressable, Text } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { create } from '../../service/notes';
-import { useToast } from 'native-base';
+import { useToast, useColorMode } from 'native-base';
 
 export default function CreateNoteScreen() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const toast = useToast();
+  const { colorMode } = useColorMode();
+  const isDarkMode = colorMode === 'dark';
 
   const handleCreate = async () => {
     if (!title.trim() || !description.trim()) {
@@ -53,24 +55,45 @@ export default function CreateNoteScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: isDarkMode ? '#1a1a1a' : '#fff' }]}>
       <TextInput
-        style={styles.input}
+        style={[
+          styles.input,
+          {
+            backgroundColor: isDarkMode ? '#2a2a2a' : '#fff',
+            borderColor: isDarkMode ? '#333' : '#ddd',
+            color: isDarkMode ? '#fff' : '#000'
+          }
+        ]}
         placeholder="Заголовок"
+        placeholderTextColor={isDarkMode ? '#666' : '#999'}
         value={title}
         onChangeText={setTitle}
         maxLength={100}
       />
       <TextInput
-        style={[styles.input, styles.textArea]}
+        style={[
+          styles.input,
+          styles.textArea,
+          {
+            backgroundColor: isDarkMode ? '#2a2a2a' : '#fff',
+            borderColor: isDarkMode ? '#333' : '#ddd',
+            color: isDarkMode ? '#fff' : '#000'
+          }
+        ]}
         placeholder="Описание"
+        placeholderTextColor={isDarkMode ? '#666' : '#999'}
         value={description}
         onChangeText={setDescription}
         multiline
         textAlignVertical="top"
       />
       <Pressable 
-        style={[styles.button, loading && styles.buttonDisabled]}
+        style={[
+          styles.button,
+          loading && styles.buttonDisabled,
+          { backgroundColor: isDarkMode ? '#0A84FF' : '#007AFF' }
+        ]}
         onPress={handleCreate}
         disabled={loading}
       >
@@ -86,11 +109,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#fff',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
@@ -100,7 +121,6 @@ const styles = StyleSheet.create({
     height: 200,
   },
   button: {
-    backgroundColor: '#007AFF',
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',

@@ -5,10 +5,11 @@ import { getAllMy } from '../../service/notes';
 import { RootResNotes } from '@/types/note.types';
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Box, Icon, Input, VStack, HStack, Center, Spinner } from 'native-base';
+import { Box, Icon, Input, VStack, HStack, Center, Spinner, useColorMode } from 'native-base';
 import {format} from "date-fns";
 
 export default function SearchScreen() {
+  const { colorMode } = useColorMode();
   const [notes, setNotes] = useState<RootResNotes[]>([]);
   const [filteredNotes, setFilteredNotes] = useState<RootResNotes[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -46,7 +47,8 @@ export default function SearchScreen() {
     <Pressable 
       style={({ pressed }) => [
         styles.itemContainer,
-        pressed && styles.itemPressed
+        pressed && styles.itemPressed,
+        { backgroundColor: colorMode === 'dark' ? '#2a2a2a' : '#ffffff' }
       ]}
       onPress={() => router.push(`/note/${item.id}`)}
     >
@@ -56,13 +58,13 @@ export default function SearchScreen() {
             as={MaterialIcons}
             name="note"
             size="sm"
-            color="gray.500"
+            color={colorMode === 'dark' ? "gray.300" : "gray.500"}
           />
-          <Text style={styles.title}>
+          <Text style={[styles.title, { color: colorMode === 'dark' ? '#fff' : '#1a1a1a' }]}>
             {item.title}
           </Text>
         </HStack>
-        <Text style={styles.description}>
+        <Text style={[styles.description, { color: colorMode === 'dark' ? '#ccc' : '#666666' }]}>
           {item.description.length > 100 
             ? `${item.description.substring(0, 100)}...` 
             : item.description}
@@ -72,9 +74,9 @@ export default function SearchScreen() {
             as={MaterialIcons}
             name="access-time"
             size="xs"
-            color="gray.400"
+            color={colorMode === 'dark' ? "gray.300" : "gray.400"}
           />
-          <Text style={styles.date}>
+          <Text style={[styles.date, { color: colorMode === 'dark' ? '#999' : '#999999' }]}>
             Создано: {format(item.created_at, "yyyy.MM.dd")} в {format(item.created_at, "HH:mm")}
           </Text>
         </HStack>
@@ -83,8 +85,8 @@ export default function SearchScreen() {
   );
 
   return (
-    <View style={styles.container}>
-      <Box p={4} bg="white" shadow={2}>
+    <View style={[styles.container, { backgroundColor: colorMode === 'dark' ? '#1a1a1a' : '#fff' }]}>
+      <Box p={4} bg={colorMode === 'dark' ? "gray.900" : "white"} shadow={2}>
         <Input
           placeholder="Поиск заметок..."
           value={searchQuery}
@@ -92,12 +94,20 @@ export default function SearchScreen() {
           size="lg"
           borderRadius="10"
           autoFocus
+          color={colorMode === 'dark' ? "white" : "black"}
+          placeholderTextColor={colorMode === 'dark' ? "gray.400" : "gray.500"}
+          borderColor={colorMode === 'dark' ? "gray.700" : "gray.200"}
+          backgroundColor={colorMode === 'dark' ? "gray.800" : "white"}
+          _focus={{
+            backgroundColor: colorMode === 'dark' ? "gray.800" : "white",
+            borderColor: colorMode === 'dark' ? "gray.600" : "gray.300",
+          }}
           InputLeftElement={
             <Icon
               as={MaterialIcons}
               name="search"
               size="sm"
-              color="gray.400"
+              color={colorMode === 'dark' ? "gray.400" : "gray.500"}
               ml={3}
             />
           }
@@ -108,7 +118,7 @@ export default function SearchScreen() {
                   as={MaterialIcons}
                   name="close"
                   size="sm"
-                  color="gray.400"
+                  color={colorMode === 'dark' ? "gray.400" : "gray.500"}
                   mr={3}
                 />
               </Pressable>
@@ -119,7 +129,7 @@ export default function SearchScreen() {
       
       {loading ? (
         <Center flex={1}>
-          <Spinner size="lg" />
+          <Spinner size="lg" color={colorMode === 'dark' ? "white" : "blue.500"} />
         </Center>
       ) : (
         <FlashList
@@ -130,7 +140,11 @@ export default function SearchScreen() {
           showsVerticalScrollIndicator={false}
           estimatedItemSize={100}
           refreshControl={
-            <RefreshControl refreshing={loading} onRefresh={loadNotes} />
+            <RefreshControl 
+              refreshing={loading} 
+              onRefresh={loadNotes}
+              tintColor={colorMode === 'dark' ? "#fff" : "#000"}
+            />
           }
           ListEmptyComponent={
             <Center flex={1} pt={10}>
@@ -138,9 +152,9 @@ export default function SearchScreen() {
                 as={MaterialIcons}
                 name={searchQuery ? "search-off" : "search"}
                 size="4xl"
-                color="gray.300"
+                color={colorMode === 'dark' ? "gray.600" : "gray.300"}
               />
-              <Text style={styles.emptyText}>
+              <Text style={[styles.emptyText, { color: colorMode === 'dark' ? '#999' : '#999999' }]}>
                 {searchQuery 
                   ? 'Заметки не найдены'
                   : 'Начните поиск'}
@@ -156,13 +170,11 @@ export default function SearchScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   listContent: {
     padding: 16,
   },
   itemContainer: {
-    backgroundColor: '#ffffff',
     borderRadius: 12,
     marginBottom: 12,
     elevation: 2,
@@ -184,22 +196,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1a1a1a',
-    flex: 1,
   },
   description: {
     fontSize: 14,
-    color: '#666666',
     lineHeight: 20,
   },
   date: {
     fontSize: 12,
-    color: '#999999',
   },
   emptyText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#999999',
     textAlign: 'center',
   },
 });

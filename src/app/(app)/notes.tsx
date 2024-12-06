@@ -7,17 +7,18 @@ import { useFont } from "@shopify/react-native-skia";
 import { router, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { format } from 'date-fns';
-import { Icon, VStack, HStack, Center, Spinner } from 'native-base';
+import { Icon, VStack, HStack, Center, Spinner, useColorMode } from 'native-base';
 
 export default function NotesScreen() {
   const [notes, setNotes] = useState<RootResNotes[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const font = useFont(require('../assets/fonts/Roboto-Regular.ttf'), 14);
   const { refresh } = useLocalSearchParams();
+  const { colorMode } = useColorMode();
 
   useEffect(() => {
     loadNotes();
-  }, [refresh]);
+  }, [refresh, colorMode]);
 
   const loadNotes = async () => {
     try {
@@ -36,17 +37,18 @@ export default function NotesScreen() {
     <Pressable 
       style={({ pressed }) => [
         styles.itemContainer,
-        pressed && styles.itemPressed
+        pressed && styles.itemPressed,
+        { backgroundColor: colorMode === 'dark' ? '#2a2a2a' : '#ffffff' }
       ]}
       onPress={() => router.push(`/note/${item.id}`)}
     >
       <VStack space={2} style={styles.canvas}>
         <HStack space={2} alignItems="center">
-          <Text style={styles.title}>
+          <Text style={[styles.title, { color: colorMode === 'dark' ? '#fff' : '#1a1a1a' }]}>
             {item.title}
           </Text>
         </HStack>
-        <Text style={styles.description}>
+        <Text style={[styles.description, { color: colorMode === 'dark' ? '#ccc' : '#666666' }]}>
           {item.description.length > 100 
             ? `${item.description.substring(0, 100)}...` 
             : item.description}
@@ -56,9 +58,9 @@ export default function NotesScreen() {
             as={MaterialIcons}
             name="access-time"
             size="xs"
-            color="gray.400"
+            color={colorMode === 'dark' ? "gray.300" : "gray.400"}
           />
-          <Text style={styles.date}>
+          <Text style={[styles.date, { color: colorMode === 'dark' ? '#999' : '#999999' }]}>
             Создано: {format(item.created_at, "yyyy.MM.dd")} в {format(item.created_at, "HH:mm")}
           </Text>
         </HStack>
@@ -67,10 +69,10 @@ export default function NotesScreen() {
   );
 
   return (
-    <View style={styles.container}>      
+    <View style={[styles.container, { backgroundColor: colorMode === 'dark' ? '#1a1a1a' : '#fff' }]}>      
       {loading && notes.length === 0 ? (
         <Center flex={1}>
-          <Spinner size="lg" />
+          <Spinner size="lg" color={colorMode === 'dark' ? "white" : "blue.500"} />
         </Center>
       ) : (
         <FlashList
@@ -80,20 +82,17 @@ export default function NotesScreen() {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           estimatedItemSize={100}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
           refreshControl={
-            <RefreshControl refreshing={loading} onRefresh={loadNotes} />
+            <RefreshControl 
+              refreshing={loading} 
+              onRefresh={loadNotes}
+              tintColor={colorMode === 'dark' ? "#fff" : "#000"}
+            />
           }
           ListEmptyComponent={
-            <Center flex={1} pt={10}>
-              <Icon 
-                as={MaterialIcons}
-                name="note"
-                size="4xl"
-                color="gray.300"
-              />
-              <Text style={styles.emptyText}>
-                 У вас пока нет заметок
+            <Center flex={1}>
+              <Text style={[styles.emptyText, { color: colorMode === 'dark' ? '#999' : '#999999' }]}>
+                У вас пока нет заметок
               </Text>
             </Center>
           }
@@ -106,13 +105,11 @@ export default function NotesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   listContent: {
     padding: 16,
   },
   itemContainer: {
-    backgroundColor: '#ffffff',
     borderRadius: 12,
     marginVertical: 6,
     elevation: 2,
@@ -139,22 +136,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1a1a1a',
-    flex: 1,
   },
   description: {
     fontSize: 14,
-    color: '#666666',
     lineHeight: 20,
   },
   date: {
     fontSize: 12,
-    color: '#999999',
   },
   emptyText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#999999',
     textAlign: 'center',
   },
 });
