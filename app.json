@@ -2,10 +2,10 @@
   "expo": {
     "icon": "./assets/logo.png",
     "scheme": "acme",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "orientation": "default",
     "backgroundColor": "#FFFFFF",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splashscreen_logo.png",
       "resizeMode": "contain",
@@ -17,7 +17,15 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splashscreen_logo.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#FFFFFF"
+        }
+      ]
     ],
     "name": "Записная книжка",
     "slug": "zapisnaya-knizhka",
@@ -26,23 +34,26 @@
       "package": "com.zapisnayaknizhka.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo.png",
+        "backgroundImage": "./assets/logo.png",
         "backgroundColor": "#FFFFFF"
       },
       "permissions": []
     },
     "ios": {
       "bundleIdentifier": "com.zapisnayaknizhka.app",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": "./assets/logo.png",
+      "backgroundColor": "#FFFFFF"
     },
     "extra": {
       "themeColors": {
         "light": {
-          "backgroundColor": "#ffffff",
-          "splashBackgroundColor": "#ffffff"
+          "backgroundColor": "#FFFFFF",
+          "splashBackgroundColor": "#FFFFFF"
         },
         "dark": {
-          "backgroundColor": "#000000",
-          "splashBackgroundColor": "#000000"
+          "backgroundColor": "#FFFFFF",
+          "splashBackgroundColor": "#FFFFFF"
         }
       },
       "eas": {

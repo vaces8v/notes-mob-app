@@ -1,23 +1,34 @@
-import { View, StyleSheet, Text, RefreshControl, Pressable, TextInput, Animated } from 'react-native';
+import { View, StyleSheet, Text, RefreshControl, Pressable } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { getAllMy } from '../../service/notes';
 import { RootResNotes } from '@/types/note.types';
-import { useFont } from "@shopify/react-native-skia";
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { format } from 'date-fns';
-import { Icon, VStack, HStack, Center, Spinner } from 'native-base';
+import { Box, Icon, Input, VStack, HStack, Center, Spinner } from 'native-base';
+import {format} from "date-fns";
 
-export default function NotesScreen() {
+export default function SearchScreen() {
   const [notes, setNotes] = useState<RootResNotes[]>([]);
+  const [filteredNotes, setFilteredNotes] = useState<RootResNotes[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const font = useFont(require('../assets/fonts/Roboto-Regular.ttf'), 14);
-  const { refresh } = useLocalSearchParams();
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
     loadNotes();
-  }, [refresh]);
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      setFilteredNotes([]);
+    } else {
+      const filtered = notes.filter(note => 
+        note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        note.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredNotes(filtered);
+    }
+  }, [searchQuery, notes]);
 
   const loadNotes = async () => {
     try {
@@ -25,12 +36,11 @@ export default function NotesScreen() {
       const data = await getAllMy();
       setNotes(data);
     } catch (error) {
+      console.error('Failed to load notes:', error);
     } finally {
       setLoading(false);
     }
   };
-
-  if (!font) return null;
 
   const renderItem = ({ item }) => (
     <Pressable 
@@ -42,6 +52,12 @@ export default function NotesScreen() {
     >
       <VStack space={2} style={styles.canvas}>
         <HStack space={2} alignItems="center">
+          <Icon 
+            as={MaterialIcons}
+            name="note"
+            size="sm"
+            color="gray.500"
+          />
           <Text style={styles.title}>
             {item.title}
           </Text>
@@ -67,20 +83,52 @@ export default function NotesScreen() {
   );
 
   return (
-    <View style={styles.container}>      
-      {loading && notes.length === 0 ? (
+    <View style={styles.container}>
+      <Box p={4} bg="white" shadow={2}>
+        <Input
+          placeholder="Поиск заметок..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          size="lg"
+          borderRadius="10"
+          autoFocus
+          InputLeftElement={
+            <Icon
+              as={MaterialIcons}
+              name="search"
+              size="sm"
+              color="gray.400"
+              ml={3}
+            />
+          }
+          InputRightElement={
+            searchQuery ? (
+              <Pressable onPress={() => setSearchQuery('')}>
+                <Icon
+                  as={MaterialIcons}
+                  name="close"
+                  size="sm"
+                  color="gray.400"
+                  mr={3}
+                />
+              </Pressable>
+            ) : null
+          }
+        />
+      </Box>
+      
+      {loading ? (
         <Center flex={1}>
           <Spinner size="lg" />
         </Center>
       ) : (
         <FlashList
-          data={notes}
+          data={filteredNotes}
           renderItem={renderItem}
           keyExtractor={item => item.id.toString()}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           estimatedItemSize={100}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
           refreshControl={
             <RefreshControl refreshing={loading} onRefresh={loadNotes} />
           }
@@ -88,12 +136,14 @@ export default function NotesScreen() {
             <Center flex={1} pt={10}>
               <Icon 
                 as={MaterialIcons}
-                name="note"
+                name={searchQuery ? "search-off" : "search"}
                 size="4xl"
                 color="gray.300"
               />
               <Text style={styles.emptyText}>
-                 У вас пока нет заметок
+                {searchQuery 
+                  ? 'Заметки не найдены'
+                  : 'Начните поиск'}
               </Text>
             </Center>
           }
@@ -114,7 +164,7 @@ const styles = StyleSheet.create({
   itemContainer: {
     backgroundColor: '#ffffff',
     borderRadius: 12,
-    marginVertical: 6,
+    marginBottom: 12,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: {
@@ -123,11 +173,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: '#f0f0f0',
-    marginHorizontal: 16,
   },
   itemPressed: {
     opacity: 0.7,

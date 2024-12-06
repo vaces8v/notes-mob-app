@@ -9,7 +9,7 @@ export default function Page() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const toast = useToast();
-  const { login, isLoading } = useAuthStore();
+  const { login, isLoading, token } = useAuthStore();
 
   useEffect(() => {
     const checkToken = async () => {
@@ -20,6 +20,8 @@ export default function Page() {
     };
     checkToken();
   }, []);
+
+  if(token) return <></>;
 
   const handleLogin = async () => {
     try {
